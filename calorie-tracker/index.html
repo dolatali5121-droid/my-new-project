@@ -433,8 +433,8 @@
     <div id="historyList"></div>
   </div>
 
-  <div style="text-align:center;color:var(--muted);font-size:11px;margin-top:4px;">
-    Your API key and meal data stay on this device (browser local storage) — nothing is sent anywhere except directly to Anthropic when analyzing a photo.
+  <div style="text-align:center;color:var(--muted);font-size:11px;margin-top:4px;" id="privacyNote">
+    Meal data stays on this device (browser local storage) — nothing is sent anywhere except directly to Anthropic when analyzing a photo.
   </div>
 </div>
 
@@ -444,7 +444,7 @@
     <button class="modal-close" id="closeSettings">✕</button>
     <h3>Settings</h3>
 
-    <div class="field">
+    <div class="field" id="apiKeyField">
       <label for="apiKeyInput">Anthropic API key</label>
       <div class="pw-row">
         <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
@@ -454,7 +454,7 @@
     </div>
 
     <div class="field">
-      <label for="modelSelect">Analysis model</label>
+      <label for="modelSelect" id="modelSelectLabel">Analysis model</label>
       <select id="modelSelect">
         <option value="claude-sonnet-5">Claude Sonnet 5 (recommended)</option>
         <option value="claude-opus-5">Claude Opus 5 (most accurate)</option>
@@ -553,9 +553,11 @@
   var manualName = $("manualName"), manualCal = $("manualCal"), manualAddBtn = $("manualAddBtn");
 
   var settingsModal = $("settingsModal"), settingsBtn = $("settingsBtn"), closeSettings = $("closeSettings");
-  var apiKeyInput = $("apiKeyInput"), toggleKeyVis = $("toggleKeyVis"), modelSelect = $("modelSelect");
+  var apiKeyField = $("apiKeyField"), apiKeyInput = $("apiKeyInput"), toggleKeyVis = $("toggleKeyVis");
+  var modelSelect = $("modelSelect"), modelSelectLabel = $("modelSelectLabel");
   var goalInput = $("goalInput"), saveSettingsBtn = $("saveSettingsBtn"), clearDataBtn = $("clearDataBtn");
   var confirmModal = $("confirmModal"), confirmClearBtn = $("confirmClearBtn"), cancelClearBtn = $("cancelClearBtn");
+  var privacyNote = $("privacyNote");
 
   // ---------- image helpers ----------
   function resizeImageFile(file, maxDim, quality) {
@@ -609,7 +611,7 @@
   function showError(msg) { errorBanner.textContent = msg; errorBanner.style.display = "block"; }
   function hideError() { errorBanner.style.display = "none"; }
 
-  // ---------- Anthropic analysis ----------
+  // ---------- analysis (two backends: platform "sample" capability, or BYOK fetch) ----------
   var ANALYSIS_PROMPT =
     "You are a nutrition expert analyzing a photo of a meal. Identify each distinct food item visible, " +
     "estimate its portion size, and estimate calories for each item as well as the total. Give your best " +
@@ -620,20 +622,55 @@
     'If the image does not appear to contain food, respond with ' +
     '{"items":[],"total_calories":0,"confidence":"low","notes":"No food detected in the image."}';
 
-  function analyzeCurrentImage() {
-    if (!currentAnalysis) return;
+  var sampleFn = null;   // set once the platform "sample" capability resolves
+  var sampleMode = false; // true once we know this view can use it
+
+  function dataUrlToBlob(dataUrl) {
+    var parts = dataUrl.split(",");
+    var mime = parts[0].match(/:(.*?);/)[1];
+    var bstr = atob(parts[1]);
+    var n = bstr.length;
+    var u8 = new Uint8Array(n);
+    while (n--) u8[n] = bstr.charCodeAt(n);
+    return new Blob([u8], { type: mime });
+  }
+
+  function sampleErrorMessage(e) {
+    var map = {
+      not_granted: "You declined to let this app use Claude. You can still add meals manually.",
+      images_unavailable: "This view can't accept photos right now — try adding the meal manually.",
+      image_rejected: "That photo couldn't be processed. Try a smaller or clearer image.",
+      rate_limited: "Too many requests right now — wait a moment and try again.",
+      refused: "Claude couldn't analyze that photo. Try a clearer shot of the meal.",
+      empty_completion: "Didn't get a usable answer — try again with a clearer photo.",
+      invalid_json: "Couldn't understand the analysis. Try again.",
+      sampling_disabled: "AI analysis isn't available for this account.",
+      session_expired: "Please sign in again to use AI analysis.",
+      cancelled: "Analysis was cancelled."
+    };
+    return (e && map[e.code]) || (e && e.message) || "Something went wrong analyzing the image.";
+  }
+
+  function initSampleCapability() {
+    if (typeof window.claude === "undefined" || !window.claude.use) return;
+    window.claude.use("sample").then(function (s) {
+      if (s) { sampleFn = s; sampleMode = true; updateModeUI(); }
+    }).catch(function () {});
+  }
+
+  function analyzeWithSample() {
+    var blob = dataUrlToBlob(currentAnalysis.dataUrl);
+    var tier = settings.model === "quick" || settings.model === "complex" ? settings.model : "default";
+    return sampleFn.json(ANALYSIS_PROMPT, { images: blob, modelTier: tier, cache: false });
+  }
+
+  function analyzeWithFetch() {
     if (!settings.apiKey) {
-      showError("Add your Anthropic API key in Settings first.");
       openSettings();
-      return;
+      return Promise.reject(new Error("Add your Anthropic API key in Settings first."));
     }
-    hideError();
-    analyzeBtn.disabled = true;
-    analyzeBtn.innerHTML = '<span class="spinner"></span> Analyzing…';
-
     var base64 = currentAnalysis.dataUrl.split(",")[1];
-
-    fetch("https://api.anthropic.com/v1/messages", {
+    return fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -664,14 +701,24 @@
         .replace(/^```json\s*/i, "")
         .replace(/^```\s*/, "")
         .replace(/```\s*$/, "");
-      var parsed;
-      try { parsed = JSON.parse(jsonStr); } catch (e) {
+      try { return JSON.parse(jsonStr); } catch (e) {
         throw new Error("Couldn't understand the analysis response. Please try again.");
       }
+    });
+  }
+
+  function analyzeCurrentImage() {
+    if (!currentAnalysis) return;
+    hideError();
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = '<span class="spinner"></span> Analyzing…';
+
+    var task = sampleMode ? analyzeWithSample() : analyzeWithFetch();
+    task.then(function (parsed) {
       currentAnalysis.parsed = parsed;
       showResult(parsed);
     }).catch(function (err) {
-      showError(err.message || "Something went wrong analyzing the image.");
+      showError(sampleMode ? sampleErrorMessage(err) : (err.message || "Something went wrong analyzing the image."));
     }).finally(function () {
       analyzeBtn.disabled = false;
       analyzeBtn.textContent = "Analyze meal";
@@ -830,9 +877,37 @@
   function renderAll() { renderSummary(); renderLog(); renderHistory(); }
 
   // ---------- settings modal ----------
+  var SAMPLE_MODEL_OPTIONS =
+    '<option value="quick">Quick (fastest)</option>' +
+    '<option value="default">Balanced (recommended)</option>' +
+    '<option value="complex">Thorough (most accurate)</option>';
+  var BYOK_MODEL_OPTIONS =
+    '<option value="claude-sonnet-5">Claude Sonnet 5 (recommended)</option>' +
+    '<option value="claude-opus-5">Claude Opus 5 (most accurate)</option>' +
+    '<option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fastest)</option>';
+  var SAMPLE_TIERS = { quick: 1, "default": 1, complex: 1 };
+
+  function updateModeUI() {
+    if (sampleMode) {
+      apiKeyField.hidden = true;
+      modelSelectLabel.textContent = "Analysis detail";
+      modelSelect.innerHTML = SAMPLE_MODEL_OPTIONS;
+      if (!SAMPLE_TIERS[settings.model]) settings.model = "default";
+      privacyNote.textContent = "Meal photos are analyzed using your own Claude access. Meal data stays on this device (browser local storage).";
+    } else {
+      apiKeyField.hidden = false;
+      modelSelectLabel.textContent = "Analysis model";
+      modelSelect.innerHTML = BYOK_MODEL_OPTIONS;
+      if (SAMPLE_TIERS[settings.model]) settings.model = "claude-sonnet-5";
+      privacyNote.textContent = "Meal data stays on this device (browser local storage) — nothing is sent anywhere except directly to Anthropic when analyzing a photo.";
+    }
+    modelSelect.value = settings.model;
+  }
+
   function openSettings() {
+    updateModeUI();
     apiKeyInput.value = settings.apiKey || "";
-    modelSelect.value = settings.model || "claude-sonnet-5";
+    modelSelect.value = settings.model;
     goalInput.value = settings.dailyGoal || 2000;
     settingsModal.classList.add("open");
   }
@@ -928,6 +1003,7 @@
 
   // ---------- init ----------
   renderAll();
+  initSampleCapability();
 })();
 </script>
 </body>
