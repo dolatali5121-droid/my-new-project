@@ -3,21 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>CalTrack — Snap &amp; Track Calories</title>
+<title>CalTrack</title>
 <style>
   :root {
+    color-scheme: light dark;
     --bg: #FBF7F0;
-    --card: #FFFFFF;
-    --primary: #2F9E44;
-    --primary-dark: #237032;
-    --primary-light: #E6F6EA;
-    --accent: #FF6B35;
-    --accent-light: #FFEDE3;
+    --surface: #FFFFFF;
     --text: #23241f;
     --muted: #7a766c;
     --border: #E7E1D8;
+    --primary: #2F9E44;
+    --primary-hover: #237032;
+    --primary-tint: #E6F6EA;
+    --primary-tint-text: #1f7a35;
+    --accent: #FF6B35;
+    --accent-hover: #E85A26;
+    --accent-tint: #FFEDE3;
+    --accent-tint-text: #a13c00;
+    --warn-tint: #FFF3D6;
+    --warn-tint-text: #8a6300;
     --danger: #E03131;
     --radius: 16px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #181714;
+      --surface: #221f1b;
+      --text: #f2ede3;
+      --muted: #9b9488;
+      --border: #383228;
+      --primary: #46c26a;
+      --primary-hover: #38a058;
+      --primary-tint: #1f3324;
+      --primary-tint-text: #8fe0a8;
+      --accent: #ff9466;
+      --accent-hover: #ff7f47;
+      --accent-tint: #3a2216;
+      --accent-tint-text: #ffb98c;
+      --warn-tint: #3a2f12;
+      --warn-tint-text: #f0c95e;
+      --danger: #ff7a7a;
+    }
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #181714;
+    --surface: #221f1b;
+    --text: #f2ede3;
+    --muted: #9b9488;
+    --border: #383228;
+    --primary: #46c26a;
+    --primary-hover: #38a058;
+    --primary-tint: #1f3324;
+    --primary-tint-text: #8fe0a8;
+    --accent: #ff9466;
+    --accent-hover: #ff7f47;
+    --accent-tint: #3a2216;
+    --accent-tint-text: #ffb98c;
+    --warn-tint: #3a2f12;
+    --warn-tint-text: #f0c95e;
+    --danger: #ff7a7a;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -66,7 +114,7 @@
     height: 40px;
     border-radius: 50%;
     border: 1px solid var(--border);
-    background: var(--card);
+    background: var(--surface);
     font-size: 18px;
     display: flex;
     align-items: center;
@@ -77,7 +125,7 @@
 
   /* ---------- cards ---------- */
   .card {
-    background: var(--card);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 18px;
@@ -102,7 +150,7 @@
 
   .ring-wrap { position: relative; width: 108px; height: 108px; flex: none; }
   .ring-wrap svg { transform: rotate(-90deg); }
-  .ring-bg { stroke: var(--primary-light); }
+  .ring-bg { stroke: var(--primary-tint); }
   .ring-fg { stroke: var(--primary); transition: stroke-dashoffset .4s ease; }
   .ring-fg.over { stroke: var(--accent); }
   .ring-center {
@@ -128,7 +176,7 @@
   }
   .dropzone .big-emoji { font-size: 34px; display: block; margin-bottom: 8px; }
   .dropzone strong { color: var(--text); }
-  .dropzone.drag { border-color: var(--primary); background: var(--primary-light); }
+  .dropzone.drag { border-color: var(--primary); background: var(--primary-tint); }
 
   #fileInput, #cameraInput { display: none; }
 
@@ -164,12 +212,12 @@
   .btn:active { transform: scale(0.98); }
   .btn:disabled { opacity: .55; cursor: default; }
   .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
-  .btn-outline { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+  .btn-outline { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
   .btn-accent { background: var(--accent); color: #fff; }
-  .btn-danger { background: #fff; color: var(--danger); border: 1px solid #f3c2c2; }
+  .btn-danger { background: var(--surface); color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); }
   .btn-text {
-    background: none; border: none; color: var(--primary-dark); font-weight: 700;
+    background: none; border: none; color: var(--primary-hover); font-weight: 700;
     font-size: 13px; cursor: pointer; padding: 6px 0;
   }
 
@@ -183,8 +231,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .error-banner {
-    background: var(--accent-light); color: #a13c00;
-    border: 1px solid #ffd2b3; border-radius: 10px;
+    background: var(--accent-tint); color: var(--accent-tint-text);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 10px;
     padding: 10px 12px; font-size: 13px; margin-top: 12px;
   }
 
@@ -206,7 +254,7 @@
   .field label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
   .field input, .field select {
     width: 100%; padding: 10px 12px; border: 1px solid var(--border);
-    border-radius: 10px; font-size: 14px; background: #fff; color: var(--text);
+    border-radius: 10px; font-size: 14px; background: var(--surface); color: var(--text);
   }
 
   .total-line {
@@ -220,9 +268,9 @@
     display: inline-block; font-size: 11px; font-weight: 700;
     padding: 3px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle;
   }
-  .confidence-high { background: var(--primary-light); color: var(--primary-dark); }
-  .confidence-medium { background: #FFF3D6; color: #8a6300; }
-  .confidence-low { background: var(--accent-light); color: #a13c00; }
+  .confidence-high { background: var(--primary-tint); color: var(--primary-tint-text); }
+  .confidence-medium { background: var(--warn-tint); color: var(--warn-tint-text); }
+  .confidence-low { background: var(--accent-tint); color: var(--accent-tint-text); }
 
   .notes { font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic; }
 
@@ -234,7 +282,7 @@
   .log-row:last-child { border-bottom: none; }
   .log-thumb {
     width: 44px; height: 44px; border-radius: 10px; object-fit: cover;
-    background: var(--primary-light); flex: none;
+    background: var(--primary-tint); flex: none;
   }
   .log-thumb.placeholder {
     display: flex; align-items: center; justify-content: center; font-size: 18px;
@@ -256,7 +304,7 @@
   }
   .hist-row:last-child { border-bottom: none; }
   .hist-date { width: 82px; color: var(--muted); flex: none; }
-  .hist-bar-wrap { flex: 1; height: 8px; background: var(--primary-light); border-radius: 6px; overflow: hidden; }
+  .hist-bar-wrap { flex: 1; height: 8px; background: var(--primary-tint); border-radius: 6px; overflow: hidden; }
   .hist-bar { height: 100%; background: var(--primary); }
   .hist-bar.over { background: var(--accent); }
   .hist-cal { width: 64px; text-align: right; font-weight: 700; flex: none; }
@@ -268,7 +316,7 @@
   }
   .modal-backdrop.open { display: flex; }
   .modal {
-    background: var(--card); width: 100%; max-width: 480px;
+    background: var(--surface); width: 100%; max-width: 480px;
     border-radius: 20px 20px 0 0; padding: 20px 18px 26px;
     max-height: 88vh; overflow-y: auto;
   }
@@ -277,7 +325,7 @@
   .pw-row { position: relative; }
   .pw-row button {
     position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; font-size: 13px; color: var(--primary-dark); cursor: pointer;
+    background: none; border: none; font-size: 13px; color: var(--primary-hover); cursor: pointer;
   }
   .hint { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
   .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
@@ -428,6 +476,18 @@
   </div>
 </div>
 
+<!-- Confirm clear-data dialog -->
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal">
+    <h3>Clear all data?</h3>
+    <p style="color:var(--muted); font-size:13px; margin-top:-6px;">This deletes every logged meal and your saved API key from this device. This can't be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="confirmClearBtn">Delete everything</button>
+      <button class="btn btn-outline" id="cancelClearBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   "use strict";
@@ -439,19 +499,26 @@
 
   // ---------- storage helpers ----------
   function loadSettings() {
-    var raw = localStorage.getItem(STORAGE_SETTINGS);
     var defaults = { apiKey: "", model: "claude-sonnet-5", dailyGoal: 2000 };
-    if (!raw) return defaults;
-    try { return Object.assign(defaults, JSON.parse(raw)); } catch (e) { return defaults; }
+    try {
+      var raw = localStorage.getItem(STORAGE_SETTINGS);
+      if (!raw) return defaults;
+      return Object.assign(defaults, JSON.parse(raw));
+    } catch (e) { return defaults; }
   }
-  function saveSettings(s) { localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(s)); }
+  function saveSettings(s) {
+    try { localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(s)); } catch (e) {}
+  }
 
   function loadDays() {
-    var raw = localStorage.getItem(STORAGE_DAYS);
-    if (!raw) return {};
-    try { return JSON.parse(raw) || {}; } catch (e) { return {}; }
+    try {
+      var raw = localStorage.getItem(STORAGE_DAYS);
+      return raw ? (JSON.parse(raw) || {}) : {};
+    } catch (e) { return {}; }
   }
-  function saveDays(days) { localStorage.setItem(STORAGE_DAYS, JSON.stringify(days)); }
+  function saveDays(days) {
+    try { localStorage.setItem(STORAGE_DAYS, JSON.stringify(days)); } catch (e) {}
+  }
 
   function todayKey() {
     var d = new Date();
@@ -488,6 +555,7 @@
   var settingsModal = $("settingsModal"), settingsBtn = $("settingsBtn"), closeSettings = $("closeSettings");
   var apiKeyInput = $("apiKeyInput"), toggleKeyVis = $("toggleKeyVis"), modelSelect = $("modelSelect");
   var goalInput = $("goalInput"), saveSettingsBtn = $("saveSettingsBtn"), clearDataBtn = $("clearDataBtn");
+  var confirmModal = $("confirmModal"), confirmClearBtn = $("confirmClearBtn"), cancelClearBtn = $("cancelClearBtn");
 
   // ---------- image helpers ----------
   function resizeImageFile(file, maxDim, quality) {
@@ -790,11 +858,22 @@
   });
 
   clearDataBtn.addEventListener("click", function () {
-    if (!confirm("This deletes all logged meals and your saved API key from this device. Continue?")) return;
-    localStorage.removeItem(STORAGE_DAYS);
-    localStorage.removeItem(STORAGE_SETTINGS);
+    confirmModal.classList.add("open");
+  });
+  cancelClearBtn.addEventListener("click", function () {
+    confirmModal.classList.remove("open");
+  });
+  confirmModal.addEventListener("click", function (e) {
+    if (e.target === confirmModal) confirmModal.classList.remove("open");
+  });
+  confirmClearBtn.addEventListener("click", function () {
+    try {
+      localStorage.removeItem(STORAGE_DAYS);
+      localStorage.removeItem(STORAGE_SETTINGS);
+    } catch (e) {}
     days = {};
     settings = loadSettings();
+    confirmModal.classList.remove("open");
     closeSettingsModal();
     resetUploadFlow();
     renderAll();
