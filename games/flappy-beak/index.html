@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Flappy Beak</title>
+<style>
+  :root {
+    --sky-top: #7EC8E3;
+    --sky-bottom: #C9EFFA;
+    --grass-hi: #8BC34A;
+    --grass-shadow: #5D9C2E;
+    --wood: #8B5A2B;
+    --wood-shadow: #5C3A1A;
+    --outline: #2B2118;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #14100c;
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .phone {
+    position: relative;
+    width: 400px;
+    height: 700px;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 0 0 6px #000, 0 20px 40px rgba(0,0,0,.6);
+    touch-action: manipulation;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---------- shared chunky UI pieces ---------- */
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    background: rgba(20, 15, 10, 0.28);
+    backdrop-filter: blur(1px);
+  }
+  .overlay.hidden { display: none; }
+
+  .banner {
+    transform: scale(0);
+    animation: pop-in .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    background: linear-gradient(to bottom, #F0553F, #C22E1D);
+    border: 5px solid var(--outline);
+    border-radius: 20px;
+    padding: 14px 26px;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 8px 0 #7A1D10, 0 10px 16px rgba(0,0,0,.35);
+  }
+  .banner h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    -webkit-text-stroke: 2px var(--outline);
+    text-shadow: 0 3px 0 var(--outline);
+    text-align: center;
+  }
+
+  .hint {
+    transform: scale(0);
+    animation: pop-in .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    animation-delay: .08s;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    -webkit-text-stroke: 1px var(--outline);
+    text-shadow: 0 2px 0 var(--outline);
+  }
+
+  .game-btn {
+    transform: scale(0);
+    animation: pop-in .5s cubic-bezier(.34,1.56,.64,1) forwards;
+    animation-delay: .16s;
+    font-weight: 800;
+    font-size: 22px;
+    color: #fff;
+    text-shadow: 0 2px 0 rgba(0,0,0,.25);
+    padding: 18px 48px;
+    border: 4px solid var(--outline);
+    border-radius: 999px;
+    background: linear-gradient(to bottom, #8BDB4A, #5FA82E);
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 8px 0 #3D5A1E, 0 10px 14px rgba(0,0,0,.3);
+    cursor: pointer;
+    transition: transform .08s ease-out, box-shadow .08s ease-out;
+  }
+  .game-btn:active {
+    transform: translateY(6px);
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 2px 0 #3D5A1E, 0 4px 6px rgba(0,0,0,.2);
+  }
+  .game-btn.retry {
+    background: linear-gradient(to bottom, #F4C430, #D89F0E);
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 8px 0 #8A5E08, 0 10px 14px rgba(0,0,0,.3);
+    font-size: 18px;
+    padding: 14px 36px;
+  }
+  .game-btn.retry:active {
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 2px 0 #8A5E08, 0 4px 6px rgba(0,0,0,.2);
+  }
+
+  .popup {
+    background: linear-gradient(to bottom, #FDF3D9, #F2E2AE);
+    border: 6px solid var(--wood);
+    border-radius: 28px;
+    box-shadow: 0 14px 0 rgba(0,0,0,.15), 0 18px 30px rgba(0,0,0,.35);
+    padding: 26px 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transform: scale(0);
+    animation: popup-in .35s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  .popup h2 {
+    margin: 0;
+    color: var(--outline);
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+  .popup .score-row {
+    display: flex;
+    gap: 18px;
+    margin: 6px 0 4px;
+  }
+  .score-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(to bottom, #FFE9A8, #F7C94C);
+    border: 3px solid var(--outline);
+    border-radius: 16px;
+    padding: 8px 18px;
+    box-shadow: 0 4px 0 #8A5E08;
+  }
+  .score-box .label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--wood-shadow);
+    letter-spacing: .5px;
+  }
+  .score-box .value {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--outline);
+  }
+
+  @keyframes pop-in {
+    0%   { transform: scale(0); opacity: 0; }
+    70%  { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @keyframes popup-in {
+    0%   { transform: scale(0) rotate(-4deg); opacity: 0; }
+    60%  { transform: scale(1.08) rotate(1deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .shake { animation: screen-shake .3s ease-in-out; }
+  @keyframes screen-shake {
+    0%, 100% { transform: translate(0, 0); }
+    20%      { transform: translate(-6px, 3px); }
+    40%      { transform: translate(5px, -4px); }
+    60%      { transform: translate(-4px, -2px); }
+    80%      { transform: translate(3px, 4px); }
+  }
+</style>
+</head>
+<body>
+  <div class="phone" id="phone">
+    <canvas id="game" width="400" height="700"></canvas>
+
+    <div class="overlay" id="start-screen">
+      <div class="banner"><h1>FLAPPY<br>BEAK</h1></div>
+      <div class="hint">TAP OR PRESS SPACE TO FLAP</div>
+      <button class="game-btn" id="play-btn">PLAY</button>
+    </div>
+
+    <div class="overlay hidden" id="gameover-screen">
+      <div class="popup">
+        <h2>SPLAT!</h2>
+        <div class="score-row">
+          <div class="score-box">
+            <span class="label">SCORE</span>
+            <span class="value" id="final-score">0</span>
+          </div>
+          <div class="score-box">
+            <span class="label">BEST</span>
+            <span class="value" id="best-score">0</span>
+          </div>
+        </div>
+        <button class="game-btn retry" id="retry-btn">TRY AGAIN</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const phone = document.getElementById('phone');
+  const startScreen = document.getElementById('start-screen');
+  const gameoverScreen = document.getElementById('gameover-screen');
+  const playBtn = document.getElementById('play-btn');
+  const retryBtn = document.getElementById('retry-btn');
+  const finalScoreEl = document.getElementById('final-score');
+  const bestScoreEl = document.getElementById('best-score');
+
+  const W = canvas.width, H = canvas.height;
+  const GROUND_H = 90;
+  const OUTLINE = '#2B2118';
+
+  const COLORS = {
+    skyTop: '#7EC8E3',
+    skyBottom: '#C9EFFA',
+    grassHi: '#8BC34A',
+    grassShadow: '#5D9C2E',
+    wood: '#8B5A2B',
+    woodShadow: '#5C3A1A',
+    bodyHi: '#F26B62',
+    body: '#E8433A',
+    bodyShadow: '#A82E27',
+    accent: '#F0973B',
+    cream: '#F7E8C4'
+  };
+
+  let best = 0;
+  try { best = parseInt(localStorage.getItem('flappyBeakBest') || '0', 10) || 0; } catch (e) {}
+
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+  skyGrad.addColorStop(0, COLORS.skyTop);
+  skyGrad.addColorStop(1, COLORS.skyBottom);
+
+  let clouds = [];
+  function initClouds() {
+    clouds = [];
+    for (let i = 0; i < 4; i++) {
+      clouds.push({
+        x: Math.random() * W,
+        y: 40 + Math.random() * 180,
+        s: 0.7 + Math.random() * 0.6,
+        speed: 0.25 + Math.random() * 0.2
+      });
+    }
+  }
+  initClouds();
+
+  const GRAVITY = 0.42;
+  const FLAP_VELOCITY = -7.4;
+  const PIPE_W = 68;
+  const PIPE_GAP = 200;
+  const PIPE_SPEED = 2.5;
+  const PIPE_INTERVAL = 105; // frames between pipe spawns
+
+  let state = 'start'; // start | playing | gameover
+  let bird, pipes, frame, score, particles, groundOffset;
+
+  function resetGame() {
+    bird = {
+      x: W * 0.32,
+      y: H * 0.42,
+      vy: 0,
+      r: 20,
+      rot: 0,
+      flapPhase: 0
+    };
+    pipes = [];
+    particles = [];
+    frame = 0;
+    score = 0;
+    groundOffset = 0;
+  }
+  resetGame();
+
+  function spawnPipe() {
+    const margin = 60;
+    const gapCenter = margin + Math.random() * (H - GROUND_H - margin * 2 - PIPE_GAP) + PIPE_GAP / 2;
+    pipes.push({
+      x: W + PIPE_W,
+      gapCenter,
+      passed: false
+    });
+  }
+
+  function addBurst(x, y, colors, count = 14) {
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+      const dist = 2 + Math.random() * 3.2;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * dist,
+        vy: Math.sin(angle) * dist - 1,
+        life: 1,
+        color: colors[i % colors.length],
+        size: 4 + Math.random() * 4
+      });
+    }
+  }
+
+  function shakeScreen() {
+    phone.classList.remove('shake');
+    // restart animation
+    void phone.offsetWidth;
+    phone.classList.add('shake');
+  }
+
+  function flap() {
+    if (state === 'start') {
+      startGame();
+      return;
+    }
+    if (state === 'gameover') return;
+    bird.vy = FLAP_VELOCITY;
+    bird.flapPhase = 1;
+  }
+
+  function startGame() {
+    resetGame();
+    state = 'playing';
+    startScreen.classList.add('hidden');
+    gameoverScreen.classList.add('hidden');
+  }
+
+  function endGame() {
+    state = 'gameover';
+    addBurst(bird.x, bird.y, [COLORS.cream, COLORS.accent, '#fff'], 18);
+    shakeScreen();
+    if (score > best) {
+      best = score;
+      try { localStorage.setItem('flappyBeakBest', String(best)); } catch (e) {}
+    }
+    finalScoreEl.textContent = score;
+    bestScoreEl.textContent = best;
+    setTimeout(() => gameoverScreen.classList.remove('hidden'), 260);
+  }
+
+  function circleRectCollide(cx, cy, cr, rx, ry, rw, rh) {
+    const nearestX = Math.max(rx, Math.min(cx, rx + rw));
+    const nearestY = Math.max(ry, Math.min(cy, ry + rh));
+    const dx = cx - nearestX, dy = cy - nearestY;
+    return (dx * dx + dy * dy) < (cr * cr);
+  }
+
+  function update() {
+    frame++;
+    groundOffset = (groundOffset + PIPE_SPEED) % 40;
+
+    clouds.forEach(c => {
+      c.x -= c.speed;
+      if (c.x < -80) c.x = W + 80;
+    });
+
+    if (state === 'playing') {
+      bird.vy += GRAVITY;
+      bird.y += bird.vy;
+      bird.rot = Math.max(-0.5, Math.min(1.1, bird.vy * 0.08));
+      if (bird.flapPhase > 0) bird.flapPhase = Math.max(0, bird.flapPhase - 0.12);
+
+      if (frame % PIPE_INTERVAL === 0) spawnPipe();
+
+      pipes.forEach(p => { p.x -= PIPE_SPEED; });
+      pipes = pipes.filter(p => p.x > -PIPE_W - 10);
+
+      for (const p of pipes) {
+        const topH = p.gapCenter - PIPE_GAP / 2;
+        const bottomY = p.gapCenter + PIPE_GAP / 2;
+        // hitbox is drawn smaller than the bird's visual size, matching this genre's convention
+        // of forgiving collision so near-misses feel fair rather than cheap
+        const hitR = bird.r - 8;
+        const hitTop = circleRectCollide(bird.x, bird.y, hitR, p.x, 0, PIPE_W, topH);
+        const hitBottom = circleRectCollide(bird.x, bird.y, hitR, p.x, bottomY, PIPE_W, H - GROUND_H - bottomY);
+        if (hitTop || hitBottom) { endGame(); break; }
+
+        if (!p.passed && p.x + PIPE_W < bird.x) {
+          p.passed = true;
+          score++;
+          addBurst(bird.x + 22, bird.y - 10, ['#F4C430', '#8BDB4A', '#3E9BDC', '#fff'], 10);
+        }
+      }
+
+      if (bird.y + bird.r >= H - GROUND_H) {
+        bird.y = H - GROUND_H - bird.r;
+        endGame();
+      }
+      if (bird.y - bird.r < 0) {
+        bird.y = bird.r;
+        bird.vy = 0;
+      }
+    }
+
+    particles.forEach(pt => {
+      pt.x += pt.vx;
+      pt.y += pt.vy;
+      pt.vy += 0.12;
+      pt.life -= 0.025;
+    });
+    particles = particles.filter(pt => pt.life > 0);
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    clouds.forEach(c => {
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.scale(c.s, c.s);
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 34, 16, 0, 0, Math.PI * 2);
+      ctx.ellipse(24, 4, 22, 13, 0, 0, Math.PI * 2);
+      ctx.ellipse(-22, 6, 20, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function drawPipe(p) {
+    const topH = p.gapCenter - PIPE_GAP / 2;
+    const bottomY = p.gapCenter + PIPE_GAP / 2;
+    const bottomH = H - GROUND_H - bottomY;
+    const capH = 26;
+    const capOverhang = 8;
+
+    [
+      { y: 0, h: topH, capY: topH - capH, flip: false },
+      { y: bottomY, h: bottomH, capY: bottomY, flip: true }
+    ].forEach(seg => {
+      // column body
+      const bodyGrad = ctx.createLinearGradient(p.x, 0, p.x + PIPE_W, 0);
+      bodyGrad.addColorStop(0, COLORS.wood);
+      bodyGrad.addColorStop(1, COLORS.woodShadow);
+      ctx.fillStyle = bodyGrad;
+      roundRect(p.x, seg.y, PIPE_W, seg.h, 14);
+      ctx.fill();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = OUTLINE;
+      ctx.stroke();
+
+      // grassy cap lip
+      const capY = seg.flip ? seg.y : seg.capY;
+      const capGrad = ctx.createLinearGradient(p.x - capOverhang, 0, p.x + PIPE_W + capOverhang, 0);
+      capGrad.addColorStop(0, COLORS.grassHi);
+      capGrad.addColorStop(1, COLORS.grassShadow);
+      ctx.fillStyle = capGrad;
+      roundRect(p.x - capOverhang, capY, PIPE_W + capOverhang * 2, capH, 12);
+      ctx.fill();
+      ctx.stroke();
+    });
+  }
+
+  function drawGround() {
+    const grassGrad = ctx.createLinearGradient(0, H - GROUND_H, 0, H);
+    grassGrad.addColorStop(0, COLORS.grassHi);
+    grassGrad.addColorStop(1, COLORS.grassShadow);
+    ctx.fillStyle = grassGrad;
+    ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
+
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(0, H - GROUND_H);
+    ctx.lineTo(W, H - GROUND_H);
+    ctx.stroke();
+
+    // scrolling jagged grass shadow line
+    ctx.fillStyle = COLORS.grassShadow;
+    ctx.beginPath();
+    ctx.moveTo(-40 + groundOffset, H - GROUND_H);
+    for (let x = -40 + groundOffset; x < W + 40; x += 20) {
+      ctx.lineTo(x + 10, H - GROUND_H + 10);
+      ctx.lineTo(x + 20, H - GROUND_H);
+    }
+    ctx.lineTo(W, H - GROUND_H + 22);
+    ctx.lineTo(0, H - GROUND_H + 22);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawBird() {
+    ctx.save();
+    ctx.translate(bird.x, bird.y);
+    ctx.rotate(bird.rot);
+
+    // wing (flaps up when flapPhase high)
+    const wingLift = -8 - bird.flapPhase * 14;
+    ctx.save();
+    ctx.translate(-4, 4);
+    ctx.rotate(wingLift * 0.03);
+    ctx.fillStyle = COLORS.bodyShadow;
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    // body
+    const bodyGrad = ctx.createRadialGradient(-6, -8, 4, 0, 0, bird.r + 4);
+    bodyGrad.addColorStop(0, COLORS.bodyHi);
+    bodyGrad.addColorStop(1, COLORS.body);
+    ctx.fillStyle = bodyGrad;
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, bird.r, bird.r * 0.92, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // tail feather tuft
+    ctx.fillStyle = COLORS.bodyShadow;
+    ctx.beginPath();
+    ctx.moveTo(-bird.r + 2, -4);
+    ctx.lineTo(-bird.r - 9, -10);
+    ctx.lineTo(-bird.r - 2, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // belly accent
+    ctx.fillStyle = COLORS.cream;
+    ctx.beginPath();
+    ctx.ellipse(2, 8, bird.r * 0.6, bird.r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // eye
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.ellipse(7, -6, 8, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = OUTLINE;
+    ctx.beginPath();
+    ctx.arc(9, -5, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // eyebrow (angry birds attitude)
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, -14);
+    ctx.lineTo(12, -17);
+    ctx.stroke();
+
+    // beak
+    ctx.fillStyle = COLORS.accent;
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bird.r - 4, -2);
+    ctx.lineTo(bird.r + 14, 2);
+    ctx.lineTo(bird.r - 4, 9);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawParticles() {
+    particles.forEach(pt => {
+      ctx.globalAlpha = Math.max(0, pt.life);
+      ctx.fillStyle = pt.color;
+      ctx.strokeStyle = OUTLINE;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size * pt.life, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function drawScore() {
+    if (state === 'start') return;
+    ctx.save();
+    ctx.font = '900 52px -apple-system, Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = OUTLINE;
+    ctx.strokeText(score, W / 2, 30);
+    ctx.fillStyle = '#FFE9A8';
+    ctx.fillText(score, W / 2, 30);
+    ctx.restore();
+  }
+
+  function draw() {
+    drawBackground();
+    pipes.forEach(drawPipe);
+    drawGround();
+    drawBird();
+    drawParticles();
+    drawScore();
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- input ----------
+  function onPress(e) {
+    if (e.target === playBtn || e.target === retryBtn) return;
+    e.preventDefault();
+    flap();
+  }
+  canvas.addEventListener('pointerdown', onPress);
+  phone.addEventListener('pointerdown', (e) => {
+    if (state !== 'start' && state !== 'gameover') onPress(e);
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      e.preventDefault();
+      flap();
+    }
+  });
+  playBtn.addEventListener('click', startGame);
+  retryBtn.addEventListener('click', startGame);
+
+  bestScoreEl.textContent = best;
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
