@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CalorieSnap</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="app-header">
+  <h1>🍽️ CalorieSnap</h1>
+  <p class="tagline">Snap a photo of your meal. We'll estimate the calories.</p>
+</header>
+
+<main class="container">
+  <section class="card upload-card">
+    <h2>Add a meal</h2>
+    <label class="upload-zone" id="uploadZone">
+      <input type="file" id="imageInput" accept="image/*" capture="environment" hidden />
+      <span id="uploadPrompt">📷 Tap to upload or take a photo</span>
+      <img id="previewImg" alt="" hidden />
+    </label>
+    <div id="analyzeStatus" class="status" hidden></div>
+
+    <div id="draftResult" class="draft-result" hidden>
+      <h3>Estimated items</h3>
+      <div id="draftItems" class="items-list"></div>
+      <button type="button" id="addItemBtn" class="link-btn">+ add item</button>
+
+      <div class="draft-total">
+        Total: <strong id="draftTotal">0</strong> kcal
+      </div>
+
+      <div id="confidenceNote" class="confidence-note"></div>
+
+      <div class="save-row">
+        <label>
+          Date
+          <input type="date" id="mealDate" />
+        </label>
+        <button type="button" id="saveMealBtn" class="primary-btn">Save to log</button>
+        <button type="button" id="discardBtn" class="secondary-btn">Discard</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="summary-header">
+      <h2>Daily log</h2>
+      <input type="date" id="logDate" />
+    </div>
+
+    <div class="goal-row">
+      <label>
+        Daily goal
+        <input type="number" id="goalInput" min="0" step="50" placeholder="e.g. 2000" />
+        kcal
+      </label>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+      <div id="progressLabel" class="progress-label">0 / 0 kcal</div>
+    </div>
+
+    <div id="mealsList" class="meals-list"></div>
+  </section>
+
+  <section class="card">
+    <h2>Last 7 days</h2>
+    <div id="historyChart" class="history-chart"></div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
