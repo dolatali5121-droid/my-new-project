@@ -1,0 +1,192 @@
+/* ==========================================================================
+   base.css — design tokens, reset and typography
+   Smart Study Planner & Task Manager
+   ========================================================================== */
+
+:root {
+  /* brand — professional green ramp */
+  --green-50:  #eef9f3;
+  --green-100: #d6f1e3;
+  --green-200: #abe2c7;
+  --green-300: #78cfa7;
+  --green-400: #45b585;
+  --green-500: #1d9a6c;
+  --green-600: #157f58;
+  --green-700: #126548;
+  --green-800: #0f5038;
+  --green-900: #0c3c2b;
+
+  /* neutrals */
+  --white: #ffffff;
+  --canvas: #f4f8f6;
+  --surface: #ffffff;
+  --surface-2: #f7faf8;
+  --surface-3: #eef4f0;
+  --border: #e2ebe6;
+  --border-strong: #cddbd3;
+  --text: #13221c;
+  --text-soft: #4a5f55;
+  --text-muted: #708379;
+
+  /* accents */
+  --amber: #b4761a;
+  --amber-bg: #fdf3e2;
+  --red: #c0392f;
+  --red-bg: #fdefee;
+  --on-danger: #ffffff;
+  --blue: #2a6ca8;
+  --blue-bg: #eef4fb;
+
+  /* semantic */
+  --accent: var(--green-600);
+  --accent-hover: var(--green-700);
+  --accent-soft: var(--green-50);
+  --accent-ring: rgba(21, 127, 88, .28);
+  --on-accent: #ffffff;
+
+  /* shape & depth */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-full: 999px;
+
+  --shadow-xs: 0 1px 2px rgba(16, 45, 33, .06);
+  --shadow-sm: 0 2px 6px rgba(16, 45, 33, .06), 0 1px 2px rgba(16, 45, 33, .04);
+  --shadow-md: 0 10px 24px -12px rgba(16, 45, 33, .22), 0 2px 6px rgba(16, 45, 33, .05);
+  --shadow-lg: 0 28px 60px -24px rgba(16, 45, 33, .32);
+
+  --sidebar-w: 264px;
+  --topbar-h: 68px;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-num: "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --canvas: #0d1512;
+  --surface: #141f1a;
+  --surface-2: #18271f;
+  --surface-3: #1e3128;
+  --border: #23372d;
+  --border-strong: #2f4a3c;
+  --text: #e9f2ec;
+  --text-soft: #b3c7bb;
+  --text-muted: #8aa295;
+
+  --accent: var(--green-400);
+  --accent-hover: var(--green-300);
+  --accent-soft: #163227;
+  --accent-ring: rgba(69, 181, 133, .32);
+  --on-accent: #06251a;
+
+  --amber: #e0a960;
+  --amber-bg: #33260f;
+  --red: #f08b81;
+  --red-bg: #3a1c19;
+  --on-danger: #2d100c;
+  --blue: #86b6e3;
+  --blue-bg: #14273a;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .35);
+  --shadow-md: 0 12px 28px -14px rgba(0, 0, 0, .7);
+  --shadow-lg: 0 30px 70px -26px rgba(0, 0, 0, .8);
+
+  color-scheme: dark;
+}
+
+/* ── reset ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, p, figure, dl, dd { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+img, svg { display: block; max-width: 100%; }
+
+/* keep the hidden attribute authoritative over component display rules */
+[hidden] { display: none !important; }
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+::selection { background: var(--green-200); color: var(--green-900); }
+
+/* ── typography helpers ──────────────────────────────────────────────── */
+.muted { color: var(--text-muted); font-size: .9rem; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px; top: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: top .18s var(--ease);
+}
+.skip-link:focus { top: 12px; }
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.spacer { flex: 1 1 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
