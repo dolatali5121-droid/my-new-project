@@ -1,3 +1,8 @@
 renders/
 **/node_modules/
 **/.hyperframes/
+!gears-villa/renders/
+gears-villa/footage/
+gears-villa/assets/audio/premix.wav
+gears-villa/landscape/footage
+gears-villa/portrait/footage

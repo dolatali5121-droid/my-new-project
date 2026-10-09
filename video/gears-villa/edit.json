@@ -1,0 +1,393 @@
+{
+ "title": "Behind Every Great Sports Brand",
+ "duration": 36,
+ "sources": {
+  "raw1": {
+   "file": "footage/raw1.mp4",
+   "what": "Band-knife cutting of stacked fabric layers (clean picture, real machine audio)",
+   "grade": "brightness(0.94) contrast(1.08) saturate(0.95)"
+  },
+  "raw2": {
+   "file": "footage/raw2.mp4",
+   "what": "Packed garments, cartons, warehouse, container loading (social edit with added music)",
+   "grade": "brightness(0.98) contrast(1.07) saturate(0.88)"
+  },
+  "raw4": {
+   "file": "footage/raw4.mp4",
+   "what": "Sewing floor: overlock/flatlock stitching of jersey fabric (added music)",
+   "grade": "brightness(1.08) contrast(1.05) saturate(0.95)"
+  }
+ },
+ "excluded": {
+  "raw3": "Burned-in captions on every frame and a 'LEOON INDUSTRY' end card (another company's branding). Not used until ownership is confirmed."
+ },
+ "shots": [
+  {
+   "id": "A1",
+   "src": "raw1",
+   "in": 2.0,
+   "at": 0.5,
+   "dur": 2.35,
+   "rate": 0.8,
+   "note": "blade tracing the curve - hook close-up"
+  },
+  {
+   "id": "A2",
+   "src": "raw4",
+   "in": 5.65,
+   "at": 2.85,
+   "dur": 1.15,
+   "note": "overlock needle on grey jersey"
+  },
+  {
+   "id": "B1",
+   "src": "raw1",
+   "in": 17.0,
+   "at": 4.0,
+   "dur": 2.0,
+   "note": "gloved hand guiding the stack (sharpest raw1)"
+  },
+  {
+   "id": "B2",
+   "src": "raw4",
+   "in": 4.0,
+   "at": 6.0,
+   "dur": 1.5,
+   "note": "hands feeding striped fabric"
+  },
+  {
+   "id": "B3",
+   "src": "raw4",
+   "in": 8.15,
+   "at": 7.5,
+   "dur": 1.5,
+   "note": "sewing floor, two operators"
+  },
+  {
+   "id": "B4",
+   "src": "raw1",
+   "in": 37.6,
+   "at": 9.0,
+   "dur": 1.0,
+   "note": "glove pushes layered stack - motion into the wipe"
+  },
+  {
+   "id": "C1",
+   "src": "raw4",
+   "in": 10.15,
+   "at": 10.0,
+   "dur": 1.1,
+   "note": "mesh jersey with hood at the machine"
+  },
+  {
+   "id": "C2",
+   "src": "raw1",
+   "in": 44.4,
+   "at": 11.1,
+   "dur": 1.6,
+   "note": "cut panels drop from the stack"
+  },
+  {
+   "id": "C3",
+   "src": "raw4",
+   "in": 11.3,
+   "at": 12.7,
+   "dur": 1.5,
+   "note": "operator at JACK machine"
+  },
+  {
+   "id": "C4",
+   "src": "raw2",
+   "in": 19.0,
+   "at": 14.2,
+   "dur": 2.1,
+   "note": "polybagged garments, team at work"
+  },
+  {
+   "id": "C5",
+   "src": "raw2",
+   "in": 22.6,
+   "at": 16.3,
+   "dur": 0.7,
+   "note": "finished jackets on rack"
+  },
+  {
+   "id": "D1",
+   "src": "raw2",
+   "in": 4.5,
+   "at": 17.0,
+   "dur": 1.5,
+   "note": "packing finished garments"
+  },
+  {
+   "id": "D2",
+   "src": "raw2",
+   "in": 8.3,
+   "at": 18.5,
+   "dur": 1.5,
+   "note": "stacked garments ready to box"
+  },
+  {
+   "id": "D3",
+   "src": "raw2",
+   "in": 29.5,
+   "at": 20.0,
+   "dur": 2.0,
+   "note": "floor of sealed cartons (bulk)"
+  },
+  {
+   "id": "D4",
+   "src": "raw2",
+   "in": 37.9,
+   "at": 22.0,
+   "dur": 1.5,
+   "note": "container loading"
+  },
+  {
+   "id": "D5",
+   "src": "raw2",
+   "in": 40.4,
+   "at": 23.5,
+   "dur": 1.5,
+   "note": "container truck"
+  },
+  {
+   "id": "E1",
+   "src": "raw1",
+   "in": 7.2,
+   "at": 25.0,
+   "dur": 1.3,
+   "note": "precision cut close-up"
+  },
+  {
+   "id": "E2",
+   "src": "raw4",
+   "in": 0.0,
+   "at": 26.3,
+   "dur": 1.2,
+   "note": "sewing floor wide"
+  },
+  {
+   "id": "E3",
+   "src": "raw2",
+   "in": 0.2,
+   "at": 27.5,
+   "dur": 1.5,
+   "note": "warehouse: cartons + garments"
+  }
+ ],
+ "triptych": {
+  "start": 4.0,
+  "end": 10.0,
+  "panels": [
+   [
+    {
+     "src": "raw1",
+     "in": 17.0,
+     "at": 4.0,
+     "dur": 3.0
+    },
+    {
+     "src": "raw1",
+     "in": 37.6,
+     "at": 7.0,
+     "dur": 3.0
+    }
+   ],
+   [
+    {
+     "src": "raw4",
+     "in": 3.75,
+     "at": 4.15,
+     "dur": 3.05
+    },
+    {
+     "src": "raw4",
+     "in": 8.15,
+     "at": 7.2,
+     "dur": 2.8
+    }
+   ],
+   [
+    {
+     "src": "raw1",
+     "in": 27.5,
+     "at": 4.3,
+     "dur": 3.2
+    },
+    {
+     "src": "raw1",
+     "in": 12.0,
+     "at": 7.5,
+     "dur": 2.5
+    }
+   ]
+  ]
+ },
+ "text": [
+  {
+   "id": "t1",
+   "scene": "hook",
+   "lines": [
+    "EVERY GREAT",
+    "SPORTS BRAND"
+   ],
+   "lines_b": [
+    "STARTS WITH",
+    "A VISION."
+   ],
+   "at": 0.9,
+   "out": 3.75
+  },
+  {
+   "id": "t2",
+   "scene": "craft",
+   "lines": [
+    "PRECISION IN",
+    "EVERY STITCH."
+   ],
+   "at": 6.0,
+   "out": 9.6
+  },
+  {
+   "id": "t3",
+   "scene": "brand",
+   "lines": [
+    "YOUR DESIGNS.",
+    "YOUR IDENTITY."
+   ],
+   "at": 10.6,
+   "out": 16.7
+  },
+  {
+   "id": "t4",
+   "scene": "bulk",
+   "lines": [
+    "CUSTOM SPORTSWEAR.",
+    "BULK PRODUCTION."
+   ],
+   "at": 17.6,
+   "out": 24.7
+  }
+ ],
+ "endcard": {
+  "at": 29.0
+ },
+ "vo": [
+  {
+   "file": "assets/vo/vo1.wav",
+   "at": 4.3,
+   "subs": [
+    "Behind every great sports brand",
+    "is the craftsmanship that brings its vision to life."
+   ]
+  },
+  {
+   "file": "assets/vo/vo2.wav",
+   "at": 10.4,
+   "subs": [
+    "From custom team uniforms to branded athletic apparel,",
+    "every detail starts with your vision."
+   ]
+  },
+  {
+   "file": "assets/vo/vo3.wav",
+   "at": 17.4,
+   "subs": [
+    "With dedicated manufacturing and bulk production capabilities,",
+    "we help bring your sportswear ideas to market."
+   ]
+  },
+  {
+   "file": "assets/vo/vo4.wav",
+   "at": 29.4,
+   "subs": [
+    "Gears Villa.",
+    "Your vision, our manufacturing.",
+    "Let's build your brand together."
+   ]
+  }
+ ],
+ "music": {
+  "in": 4.0,
+  "build": 17.0,
+  "peak": 25.0,
+  "end_hit": 29.0
+ },
+ "sfx": {
+  "whoosh": [
+   10.0,
+   25.0
+  ]
+ },
+ "ambience": {
+  "src": "footage/raw1.mp4",
+  "src_in": 2.0,
+  "envelope": [
+   [
+    0,
+    0
+   ],
+   [
+    0.3,
+    1.1
+   ],
+   [
+    3.9,
+    1.1
+   ],
+   [
+    4.3,
+    0.35
+   ],
+   [
+    24.8,
+    0.35
+   ],
+   [
+    25.0,
+    0.7
+   ],
+   [
+    28.8,
+    0.5
+   ],
+   [
+    29.3,
+    0.08
+   ],
+   [
+    36,
+    0
+   ]
+  ]
+ },
+ "source_cuts": {
+  "raw2": [
+   3.8,
+   14.5,
+   15.1,
+   28.97,
+   39.67
+  ],
+  "raw4": [
+   3.7,
+   5.6,
+   6.83,
+   8.1,
+   10.13,
+   11.27,
+   13.0
+  ],
+  "raw2_flash_frames": [
+   10.5,
+   11.0,
+   14.5,
+   18.0,
+   21.5,
+   25.0,
+   32.5,
+   36.0
+  ]
+ }
+}
